@@ -1,4 +1,3 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Triệu phú đố vui</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;500&family=Montserrat:wght@500;700;800&family=Lora:wght@500;700&display=swap">
@@ -7,9 +6,9 @@
    One deliberate dark look (deep teal stage, cream type, orange for the answer in play). */
 :root{
   color-scheme:dark;
-  --bg:#071F26; --panel:#0D2E37; --tile:#11404B; --tile-hi:#17525F; --line:#245A67;
-  --ink:#F2EADB; --muted:#8FB4B9;
-  --pick:#FF9B42; --pick-fg:#2A1300;
+  --bg:#051820; --panel:#0E3441; --tile:#18506A; --tile-hi:#216A88; --line:#4A8CA6;
+  --ink:#FFFBF2; --muted:#BCD8E0;
+  --pick:#FFB02E; --pick-fg:#2A1700;
   --good:#46D6A0; --good-bg:#0F4A3E; --bad:#FF6B7A; --bad-bg:#4F1B2A;
   --warn:#F2C25A; --warn-bg:#3D3010;
   --f-display:'Bricolage Grotesque','Be Vietnam Pro',system-ui,sans-serif;
@@ -24,6 +23,7 @@ body{
   padding-block:16px 48px;
 }
 button{font:inherit;color:inherit}
+[hidden],.tabs[hidden]{display:none!important}
 :focus-visible{outline:3px solid var(--pick);outline-offset:2px}
 
 /* header */
@@ -66,7 +66,7 @@ button{font:inherit;color:inherit}
 .lifelines{display:flex;gap:8px;flex-wrap:wrap}
 .life{border:1.5px solid var(--line);background:transparent;border-radius:99px;padding:8px 14px;font-weight:600;font-size:.88rem;cursor:pointer}
 .life:hover:not([disabled]){border-color:var(--pick);color:var(--pick)}
-.life[disabled]{opacity:.35;cursor:not-allowed}
+.life[disabled]{opacity:.5;cursor:not-allowed}
 .life.used{text-decoration:line-through}
 .qmeta{font-family:var(--f-mono);font-size:.84rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:26px 0 0;font-variant-numeric:tabular-nums}
 .qmeta b{color:var(--ink);font-weight:500}
@@ -98,10 +98,10 @@ button{font:inherit;color:inherit}
 .ladder{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;position:sticky;top:16px;min-width:0}
 .ladder.plain{position:static}
 .ladder ol{list-style:none;margin:0;padding:0;display:grid;gap:4px}
-.ladder li{display:grid;grid-template-columns:2.6ch 1fr auto;gap:10px;align-items:center;padding:7px 10px;border-radius:9px;font-family:var(--f-mono);font-size:.88rem;font-variant-numeric:tabular-nums;color:var(--muted)}
+.ladder li{display:grid;grid-template-columns:2.6ch 1fr auto;gap:10px;align-items:center;padding:7px 10px;border-radius:9px;font-family:var(--f-mono);font-size:.98rem;font-variant-numeric:tabular-nums;color:var(--muted)}
 .ladder li .pz{text-align:right}
-.ladder li.safe{color:var(--ink)}
-.ladder li.done{opacity:.55}
+.ladder li.safe{color:var(--ink);font-weight:500}
+.ladder li.done{opacity:.8}
 .ladder li.cur{background:var(--pick);color:var(--pick-fg);font-weight:500}
 .flag{font-size:.64rem;letter-spacing:.08em;text-transform:uppercase;border:1px solid currentColor;border-radius:99px;padding:0 7px;min-width:1px}
 .flag:empty{display:none}
@@ -315,7 +315,7 @@ function confirmAns(){
 }
 function next(){
   if(g.phase!=='ask'||!g.locked) return;
-  if(!g.ok){endGame('lose');return;}
+  if(!g.ok){g=blank();renderPlay();window.scrollTo(0,0);return;}
   if(g.idx+1>=g.items.length){endGame('win');return;}
   g.idx++;g.sel=-1;g.locked=false;g.ok=false;g.removed={};g.poll=null;g.hint=null;
   renderPlay();window.scrollTo(0,0);
@@ -423,10 +423,10 @@ function questionHTML(){
   }
   h+='<div class="actions">';
   if(g.locked){
-    var lab=!g.ok?'Xem kết quả':(g.idx+1>=n?'Nhận giải thưởng':'Câu tiếp');
-    h+='<span></span><button type="button" class="btn primary big" data-act="next">'+lab+' →</button>';
+    var lab=!g.ok?'Về trang đầu':(g.idx+1>=n?'Nhận giải thưởng':'Câu tiếp');
+    h+=(g.ok?'<button type="button" class="btn" data-act="restart">Chơi lại từ đầu</button>':'<span></span>')+'<button type="button" class="btn primary big" data-act="next">'+lab+' →</button>';
   }else{
-    h+='<button type="button" class="btn" data-act="walk">Dừng cuộc chơi · nhận '+money(g.won)+'</button>';
+    h+='<div class="row"><button type="button" class="btn" data-act="walk">Dừng cuộc chơi · nhận '+money(g.won)+'</button><button type="button" class="btn" data-act="restart">Chơi lại từ đầu</button></div>';
     h+='<button type="button" class="btn primary big" data-act="confirm"'+(g.sel<0?' disabled':'')+'>Chốt đáp án</button>';
   }
   h+='</div></section>'+ladderHTML(false)+'</div>';
@@ -438,7 +438,7 @@ function resultHTML(){
   var h='<section class="result"><p class="eyebrow">Kết thúc</p><h2>'+head+'</h2>';
   h+='<p class="bigamt" id="amt">'+money(0)+'</p>';
   h+='<p class="sub">Trả lời đúng '+g.right+' / '+n+' câu.</p>';
-  h+='<div class="row"><button type="button" class="btn primary big" data-act="start">Chơi lại</button><button type="button" class="btn" data-act="toedit">Sửa câu hỏi</button></div></section>';
+  h+='<div class="row"><button type="button" class="btn primary big" data-act="start">Chơi lại</button></div></section>';
   return h;
 }
 function countUp(el,from,to){
@@ -455,6 +455,8 @@ function countUp(el,from,to){
 function renderPlay(){
   var el=$('play');
   el.innerHTML=g.phase==='start'?startHTML():g.phase==='ask'?questionHTML():resultHTML();
+  var nav=document.querySelector('.tabs');
+  if(nav) nav.hidden=(mode==='play'&&g.phase!=='start');
   if(g.anim){var a=g.anim;g.anim=null;countUp($('amt'),a.from,a.to);}
 }
 
@@ -519,6 +521,7 @@ $('play').addEventListener('click',function(e){
   var a=b.dataset.act;
   if(a==='start') startGame();
   else if(a==='toedit') setMode('edit');
+  else if(a==='restart'){if(b.dataset.now) startGame(); else arm(b,'Chắc chắn chơi lại?',startGame);}
   else if(a==='pick') pick(Number(b.dataset.pos));
   else if(a==='confirm') confirmAns();
   else if(a==='next') next();
@@ -604,7 +607,7 @@ function doImport(){
 
 /* ---------- theme tab ---------- */
 var TKEY='trieu-phu-theme-v1';
-var DEF_C={bg:'#071F26',panel:'#0D2E37',tile:'#11404B',pick:'#FF9B42',ink:'#F2EADB'};
+var DEF_C={bg:'#051820',panel:'#0E3441',tile:'#18506A',pick:'#FFB02E',ink:'#FFFBF2'};
 var PRESETS=[
   ['Xanh ngọc',DEF_C],
   ['Xanh navy',{bg:'#0A1030',panel:'#121A48',tile:'#1B2766',pick:'#FFC93C',ink:'#F1F3FF'}],
@@ -657,9 +660,9 @@ function applyTheme(){
     st.setProperty('--bg',c.bg);st.setProperty('--panel',c.panel);st.setProperty('--tile',c.tile);
     st.setProperty('--ink',c.ink);st.setProperty('--pick',c.pick);
     st.setProperty('--pick-fg',lum(c.pick)>0.3?'#1A1000':'#FFFFFF');
-    st.setProperty('--line',mix(c.panel,c.ink,0.22));
-    st.setProperty('--tile-hi',mix(c.tile,c.ink,0.1));
-    st.setProperty('--muted',mix(c.bg,c.ink,0.62));
+    st.setProperty('--line',mix(c.panel,c.ink,0.32));
+    st.setProperty('--tile-hi',mix(c.tile,c.ink,0.12));
+    st.setProperty('--muted',mix(c.bg,c.ink,0.76));
     if(light){
       st.setProperty('--good','#0F7A57');st.setProperty('--good-bg','#D6F3E6');
       st.setProperty('--bad','#C62F4C');st.setProperty('--bad-bg','#FBDDE3');
@@ -734,6 +737,7 @@ function setMode(m){
   if(m==='edit'){g=blank();}
   $('play').hidden=m!=='play';$('edit').hidden=m!=='edit';$('theme').hidden=m!=='theme';
   ['play','edit','theme'].forEach(function(k){$('tab-'+k).setAttribute('aria-selected',String(m===k));});
+  if(m!=='play') document.querySelector('.tabs').hidden=false;
   if(m==='edit') renderEdit(); else if(m==='theme') renderTheme(); else renderPlay();
   window.scrollTo(0,0);
 }
@@ -755,5 +759,3 @@ applyTheme();
 renderPlay();
 })();
 </script>
-
-</body></html>
