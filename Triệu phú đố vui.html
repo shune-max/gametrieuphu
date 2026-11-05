@@ -1,0 +1,759 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Triệu phú đố vui</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;500&family=Montserrat:wght@500;700;800&family=Lora:wght@500;700&display=swap">
+<style>
+/* Layout: header strip, then a two-column stage. Left = stake, lifelines, question, answers. Right = the prize ladder, top prize first.
+   One deliberate dark look (deep teal stage, cream type, orange for the answer in play). */
+:root{
+  color-scheme:dark;
+  --bg:#071F26; --panel:#0D2E37; --tile:#11404B; --tile-hi:#17525F; --line:#245A67;
+  --ink:#F2EADB; --muted:#8FB4B9;
+  --pick:#FF9B42; --pick-fg:#2A1300;
+  --good:#46D6A0; --good-bg:#0F4A3E; --bad:#FF6B7A; --bad-bg:#4F1B2A;
+  --warn:#F2C25A; --warn-bg:#3D3010;
+  --f-display:'Bricolage Grotesque','Be Vietnam Pro',system-ui,sans-serif;
+  --f-body:'Be Vietnam Pro',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{
+  background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px));
+  padding-block:16px 48px;
+}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--pick);outline-offset:2px}
+
+/* header */
+.top{max-width:1160px;margin:0 auto 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;min-width:0;font-family:var(--f-display);font-weight:800;font-size:1.05rem}
+.brand span.t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:min(46vw,420px)}
+.mark{display:flex;align-items:flex-end;gap:3px;width:24px;height:24px;flex:none}
+.mark i{flex:1;border-radius:2px;background:var(--muted)}
+.mark i:nth-child(1){height:35%} .mark i:nth-child(2){height:65%} .mark i:nth-child(3){height:100%;background:var(--pick)}
+.tabs{display:flex;gap:4px;padding:4px;background:var(--panel);border:1px solid var(--line);border-radius:12px}
+.tabs button{border:0;background:transparent;padding:8px 16px;border-radius:9px;cursor:pointer;font-weight:600;font-size:.92rem;color:var(--muted)}
+.tabs button[aria-selected="true"]{background:var(--pick);color:var(--pick-fg)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:9px 16px;border-radius:12px;font-weight:600;font-size:.92rem;cursor:pointer}
+.btn:hover:not([disabled]){border-color:var(--pick)}
+.btn.primary{background:var(--pick);border-color:var(--pick);color:var(--pick-fg)}
+.btn.big{padding:16px 30px;font-size:1.12rem;border-radius:14px}
+.btn.small{padding:6px 11px;font-size:.82rem;border-radius:9px}
+.btn.armed{background:var(--bad-bg);border-color:var(--bad);color:var(--bad)}
+.btn[disabled]{opacity:.4;cursor:not-allowed}
+.link{background:none;border:0;padding:0;color:var(--pick);font-weight:600;cursor:pointer;text-decoration:underline}
+.eyebrow{font-family:var(--f-mono);font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+.stage{max-width:1160px;margin:0 auto}
+
+/* start */
+.hero{display:grid;grid-template-columns:1.2fr 1fr;gap:48px;align-items:center;padding-block:8px}
+.hero h1{font-family:var(--f-display);font-weight:800;font-size:clamp(2.3rem,6.4vw,4.8rem);line-height:1.02;letter-spacing:-.025em;margin:0 0 22px;text-wrap:balance;overflow-wrap:anywhere}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 28px;padding:0;list-style:none}
+.chips li{padding:5px 12px;border:1px solid var(--line);border-radius:99px;background:var(--panel);font-size:.88rem;color:var(--muted)}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.keys{font-family:var(--f-mono);font-size:.78rem;color:var(--muted);margin:24px 0 0;line-height:1.8}
+.box{border-radius:12px;padding:12px 16px;margin:0 0 22px;font-size:.93rem;max-width:60ch}
+.box.info{background:var(--panel);border:1px solid var(--line)}
+.box.warn{background:var(--warn-bg);color:var(--warn)}
+.box ul{margin:6px 0 0;padding-left:20px}
+
+/* game */
+.game{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:32px;align-items:start}
+.stake{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.amount{font-family:var(--f-display);font-weight:800;font-size:clamp(2.2rem,6vw,3.6rem);line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums;margin:0}
+.lifelines{display:flex;gap:8px;flex-wrap:wrap}
+.life{border:1.5px solid var(--line);background:transparent;border-radius:99px;padding:8px 14px;font-weight:600;font-size:.88rem;cursor:pointer}
+.life:hover:not([disabled]){border-color:var(--pick);color:var(--pick)}
+.life[disabled]{opacity:.35;cursor:not-allowed}
+.life.used{text-decoration:line-through}
+.qmeta{font-family:var(--f-mono);font-size:.84rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:26px 0 0;font-variant-numeric:tabular-nums}
+.qmeta b{color:var(--ink);font-weight:500}
+.question{font-family:var(--f-display);font-weight:700;font-size:calc(clamp(1.55rem,3.8vw,2.7rem) * var(--scale,1));line-height:1.15;letter-spacing:-.015em;margin:10px 0 24px;text-wrap:balance;overflow-wrap:anywhere}
+.hint{background:var(--panel);border:1px dashed var(--line);border-radius:12px;padding:10px 14px;margin:0 0 14px;max-width:62ch}
+.hint b{color:var(--pick)}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.opt{position:relative;overflow:hidden;display:flex;align-items:center;gap:14px;text-align:left;min-width:0;min-height:80px;background:var(--tile);border:2px solid var(--line);border-radius:14px;padding:14px 18px;font-size:calc(clamp(1.05rem,2vw,1.4rem) * var(--scale,1));font-weight:500;cursor:pointer}
+.opt:hover:not([aria-disabled="true"]){background:var(--tile-hi);border-color:var(--pick)}
+.let{flex:none;font-family:var(--f-mono);font-weight:500;color:var(--pick);font-size:1.15rem}
+.let::after{content:":"}
+.otext{flex:1;min-width:0;overflow-wrap:anywhere}
+.pct{flex:none;font-family:var(--f-mono);font-size:1rem;font-variant-numeric:tabular-nums}
+.bar{position:absolute;left:0;bottom:0;height:6px;background:var(--pick)}
+.opt.sel{background:var(--pick);border-color:var(--pick);color:var(--pick-fg)}
+.opt.sel .let{color:var(--pick-fg)} .opt.sel .bar{background:var(--pick-fg)}
+.opt.right{background:var(--good-bg);border-color:var(--good)} .opt.right .let{color:var(--good)}
+.opt.wrong{background:var(--bad-bg);border-color:var(--bad)} .opt.wrong .let{color:var(--bad)}
+.opt.gone{opacity:.22}
+.opt.gone .otext{visibility:hidden}
+.opt[aria-disabled="true"]{cursor:default}
+.tag{flex:none;font-family:var(--f-mono);font-size:.7rem;letter-spacing:.06em;text-transform:uppercase}
+.verdict{margin:22px 0 0;font-family:var(--f-display);font-weight:700;font-size:1.45rem;line-height:1.25}
+.verdict.good{color:var(--good)} .verdict.bad{color:var(--bad)}
+.explain{margin:10px 0 0;max-width:70ch;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 16px}
+.actions{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:24px}
+
+/* ladder */
+.ladder{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;position:sticky;top:16px;min-width:0}
+.ladder.plain{position:static}
+.ladder ol{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.ladder li{display:grid;grid-template-columns:2.6ch 1fr auto;gap:10px;align-items:center;padding:7px 10px;border-radius:9px;font-family:var(--f-mono);font-size:.88rem;font-variant-numeric:tabular-nums;color:var(--muted)}
+.ladder li .pz{text-align:right}
+.ladder li.safe{color:var(--ink)}
+.ladder li.done{opacity:.55}
+.ladder li.cur{background:var(--pick);color:var(--pick-fg);font-weight:500}
+.flag{font-size:.64rem;letter-spacing:.08em;text-transform:uppercase;border:1px solid currentColor;border-radius:99px;padding:0 7px;min-width:1px}
+.flag:empty{display:none}
+
+/* result */
+.result{max-width:760px}
+.result h2{font-family:var(--f-display);font-weight:800;font-size:clamp(1.8rem,4.5vw,3rem);line-height:1.08;letter-spacing:-.02em;margin:0 0 8px;text-wrap:balance}
+.bigamt{font-family:var(--f-display);font-weight:800;font-size:clamp(3rem,12vw,7rem);line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums;margin:18px 0 10px;overflow-wrap:anywhere}
+.result p.sub{color:var(--muted);margin:0 0 28px;font-size:1.05rem}
+
+/* edit */
+.edit{max-width:860px;margin:0 auto}
+.edit h2{font-family:var(--f-display);font-weight:800;font-size:clamp(1.8rem,4vw,2.6rem);line-height:1.1;letter-spacing:-.02em;margin:0 0 8px}
+.edit .lead{margin:0 0 20px;color:var(--muted);max-width:62ch}
+.edit h3{font-family:var(--f-display);font-weight:700;font-size:1.1rem;margin:0}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;display:grid;gap:12px;min-width:0}
+.settings{display:grid;grid-template-columns:1fr;gap:14px}
+.checks{display:flex;flex-wrap:wrap;gap:8px 22px}
+.check{display:flex;align-items:center;gap:10px;font-size:.95rem}
+.check input{width:20px;height:20px;accent-color:var(--pick)}
+.lbl{display:block;font-size:.84rem;font-weight:600;color:var(--muted);margin:0 0 4px}
+.lbl span{font-weight:400}
+.in{width:100%;font:inherit;color:var(--ink);background:var(--tile);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
+textarea.in{resize:vertical;min-height:64px;line-height:1.4}
+.in:focus{border-color:var(--pick)}
+.list{display:grid;gap:14px;margin:18px 0}
+.qh{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.qh .tools{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
+.qstatus{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;padding:3px 10px;border-radius:99px}
+.qstatus.ok{background:var(--good-bg);color:var(--good)} .qstatus.warn{background:var(--warn-bg);color:var(--warn)}
+.orow{display:grid;grid-template-columns:auto auto 1fr;gap:10px;align-items:center}
+.orow input[type=radio]{width:20px;height:20px;accent-color:var(--pick);margin:0}
+.orow label.letter{font-family:var(--f-mono);font-weight:500;color:var(--pick);width:2ch;cursor:pointer}
+.opts-edit{display:grid;gap:8px}
+.prizerow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:end}
+.add{width:100%;border-style:dashed;padding:14px}
+.jsonbox{font-family:var(--f-mono);font-size:.8rem;min-height:120px}
+.msg{margin:0;font-size:.9rem;color:var(--muted);min-height:1.4em}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom, 0px));background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:12px;font-size:.92rem;z-index:20;max-width:calc(100% - 32px)}
+
+/* theme tab */
+.presets{display:flex;flex-wrap:wrap;gap:8px}
+.sw{display:inline-block;width:14px;height:14px;border-radius:50%;border:1px solid var(--line);flex:none}
+.colorgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.cg{display:flex;align-items:center;gap:10px;min-width:0}
+.cg .lbl{margin:0}
+.cg code{display:block;font-family:var(--f-mono);font-size:.78rem;color:var(--muted)}
+input[type=color]{width:48px;height:38px;padding:2px;border:1px solid var(--line);border-radius:8px;background:var(--tile);cursor:pointer;flex:none}
+input[type=range]{width:100%;accent-color:var(--pick)}
+.pv{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:16px;min-width:0}
+.pv .opt{cursor:default}
+.cssbox{font-family:var(--f-mono);font-size:.82rem;min-height:130px}
+@media (max-width:900px){
+  .game{grid-template-columns:1fr}
+  .ladder{position:static}
+  .ladder ol{grid-template-columns:1fr 1fr}
+  .hero{grid-template-columns:1fr;gap:28px}
+}
+@media (max-width:700px){
+  .opts{grid-template-columns:1fr}
+  .opt{min-height:68px}
+  .ladder ol{grid-template-columns:1fr}
+  .qh .tools{margin-left:0;width:100%}
+  .prizerow{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<header class="top">
+  <div class="brand"><span class="mark" aria-hidden="true"><i></i><i></i><i></i></span><span class="t" id="brandTitle"></span></div>
+  <nav class="tabs" role="tablist" aria-label="Chế độ">
+    <button type="button" role="tab" id="tab-play" data-mode="play" aria-selected="true">Trình chiếu</button>
+    <button type="button" role="tab" id="tab-edit" data-mode="edit" aria-selected="false">Soạn câu hỏi</button>
+    <button type="button" role="tab" id="tab-theme" data-mode="theme" aria-selected="false">Giao diện</button>
+  </nav>
+  <button type="button" class="btn" id="fsBtn">Toàn màn hình</button>
+</header>
+
+<main class="stage" id="play"></main>
+<main class="edit" id="edit" hidden></main>
+<main class="edit" id="theme" hidden></main>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+(function(){
+'use strict';
+var KEY='trieu-phu-do-vui-v1';
+var LET='ABCD';
+var seq=0;
+var REDUCED=false;
+try{REDUCED=window.matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){}
+function $(id){return document.getElementById(id);}
+function nid(){seq++;return 'q'+seq+Math.random().toString(36).slice(2,6);}
+function mk(t,o,c,n,p,s){return {id:nid(),text:t,options:o,correct:c,note:n||'',prize:p||0,safe:!!s};}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function money(n){return String(Math.max(0,Math.round(n))).replace(/\B(?=(\d{3})+(?!\d))/g,'.')+' đ';}
+var DEF_PRIZES=[200000,400000,600000,1000000,2000000,3000000,6000000,10000000,30000000,150000000];
+
+function sample(){
+  var P=DEF_PRIZES;
+  return {title:'Triệu phú: Nhu cầu xã hội',shuffle:false,sample:false,life:{fifty:true,aud:true,phone:true},questions:[
+    mk("Nhu cầu xã hội được định nghĩa là gì?",["Trạng thái đòi hỏi của cá nhân về các điều kiện sinh lý thuần túy.","Nhu cầu của nhóm xã hội, biểu hiện ra ở các cá nhân đã có sự đồng nhất với nhóm.","Sự ham muốn của cá nhân về các vị trí lãnh đạo trong tổ chức.","Hệ thống quy định hành chính do chính quyền ban hành cho cộng đồng."],1,"Nhu cầu xã hội là nhu cầu của nhóm xã hội, phản ánh các điều kiện tồn tại và phát triển của nhóm, biểu hiện ra ở các cá nhân khi họ có sự đồng nhất tâm lý với nhóm.",P[0]),
+    mk("Điểm khác biệt cơ bản giữa nhu cầu xã hội và các nhu cầu bản năng, sinh lý thuần túy là gì?",["Nhu cầu xã hội mang tính cố định và không thay đổi theo thời gian.","Nhu cầu xã hội chỉ xuất hiện ở cấp độ cá nhân riêng lẻ.","Nhu cầu xã hội luôn gắn liền với sự vận động và các điều kiện lịch sử – xã hội khách quan.","Nhu cầu xã hội không phụ thuộc vào mối quan hệ giữa nhóm với môi trường."],2,"Khác với các nhu cầu bản năng sinh lý mang tính tự nhiên, nhu cầu xã hội hình thành và phát triển gắn liền với các điều kiện kinh tế, văn hóa, lịch sử - xã hội khách quan của nhóm.",P[1]),
+    mk("Nhu cầu xã hội chỉ thực sự tác động và định hướng hành vi của cá nhân khi nào?",["Khi cá nhân đạt đến sự đồng nhất tâm lý với nhóm.","Khi nhóm áp dụng các biện pháp xử phạt hành chính đối với cá nhân.","Khi cá nhân tách rời hoàn toàn khỏi các sinh hoạt tập thể.","Khi mọi nhu cầu sinh lý của cá nhân đã được thỏa mãn."],0,"Chỉ khi cá nhân đạt đến sự đồng nhất tâm lý với nhóm (chấp nhận mục tiêu, giá trị của nhóm là của mình), nhu cầu xã hội mới chuyển hóa thành động lực nội tại điều chỉnh hành vi cá nhân.",P[2]),
+    mk("Hệ thống chuẩn mực nhóm (quy chế, quy tắc ứng xử) tạo ra tác động tâm lý nào đối với cá nhân?",["Khuyến khích cá nhân thực hiện các hành vi lệch chuẩn theo sở thích.","Tạo áp lực tâm lý buộc cá nhân uốn nắn hành vi, thái độ theo quỹ đạo chung nhằm tránh bị cô lập hay đào thải.","Triệt tiêu hoàn toàn tính năng động sáng tạo của cá nhân.","Buộc cá nhân quay trở về thỏa mãn các nhu cầu bản năng ban đầu."],1,"Chuẩn mực nhóm đóng vai trò là khuôn mẫu ứng xử. Áp lực nhóm buộc cá nhân phải tự điều chỉnh hành vi để phù hợp với kỳ vọng chung, tránh nguy cơ bị cô lập hoặc khai trừ khỏi nhóm.",P[3]),
+    mk("Nhu cầu thực có tác động tích cực như thế nào đối với cá nhân?",["Kích thích tính năng động sáng tạo, thúc đẩy cá nhân thi đua lập công và phát triển nhân cách toàn diện.","Biến đổi nhân cách theo hướng thích phô trương và tranh giành lợi ích.","Gây ra tâm lý thụ động và khiến cá nhân dễ bị nhóm đào thải.","Thúc đẩy các hành vi dối trá, chạy chọt trong công việc."],0,"Nhu cầu thực phản ánh đòi hỏi phát triển chính đáng, giúp cá nhân phát huy năng lực sáng tạo, tích cực đóng góp cho tập thể và hoàn thiện bản thân.",P[4],true),
+    mk("Tác động tiêu cực của 'nhu cầu ảo' (đòi hỏi đãi ngộ xa hoa, phô trương, ham muốn khen thưởng quá mức) đối với cá nhân là gì?",["Thúc đẩy cá nhân tự giác học tập và nâng cao trình độ nghiệp vụ.","Biến đổi nhân cách tiêu cực, làm nảy sinh hành vi lệch chuẩn như chạy chọt, mua danh, dối trá.","Tăng cường khả năng thích ứng linh hoạt với hoàn cảnh tự nhiên.","Giúp cá nhân đạt được sự đồng nhất tâm lý tích cực với tập thể."],1,"Nhu cầu ảo là những mong muốn lệch chuẩn, xa rời thực tế, làm biến dạng động cơ hành vi, dẫn đến các hành vi cơ hội, dối trá và vi phạm đạo đức/chuẩn mực.",P[5]),
+    mk("Ở cấp độ nhóm xã hội, nhu cầu xã hội đóng vai trò như chiếc 'la bàn' trong chức năng nào?",["Chức năng định hướng.","Chức năng kết nối.","Chức năng điều chỉnh.","Chức năng kiềm chế."],0,"Chức năng định hướng giúp nhóm xác định mục tiêu chung, vạch ra phương hướng hoạt động và ưu tiên hành vi cho toàn bộ tập thể.",P[6]),
+    mk("Nhu cầu xã hội tạo ra trạng thái tâm lý nào để thôi thúc nhóm hành động giải quyết sự thiếu hụt về điều kiện tồn tại?",["Trạng thái căng thẳng tâm lý tích cực.","Trạng thái hoảng loạn và xung đột nội bộ.","Trạng thái thụ động và hoài nghi.","Trạng thái thỏa mãn tuyệt đối."],0,"Sự nhận thức về khoảng cách giữa điều kiện hiện tại và mục tiêu cần đạt tạo ra trạng thái căng thẳng tâm lý tích cực (động lực), kích thích nhóm hoạt động.",P[7],true),
+    mk("Yếu tố nào đóng vai trò là 'thước đo' giúp nhóm tự điều chỉnh, uốn nắn các hành vi lệch chuẩn của thành viên?",["Tham vọng cá nhân của người đứng đầu.","Nhu cầu cốt lõi của nhóm.","Các nhu cầu ảo phát sinh ngẫu nhiên.","Quy luật cạnh tranh tự do từ bên ngoài."],1,"Chức năng điều chỉnh dựa trên nhu cầu cốt lõi của nhóm làm căn cứ để khen thưởng hành vi phù hợp và uốn nắn/xử lý các hành vi đi ngược lại lợi ích chung.",P[8]),
+    mk("Chức năng kết nối của nhu cầu xã hội đối với nhóm xã hội thể hiện qua điều gì?",["Thúc đẩy tâm lý đồng nhất giữa các cá nhân, giúp kết nối các thành viên và xác định tính chất mối liên kết bên trong cộng đồng.","Phân chia nhóm thành các tiểu nhóm đối lập nhau.","Áp đặt hình phạt nghiêm khắc lên từng cá nhân riêng lẻ.","Phân hóa thứ bậc quyền lực giữa các thành viên."],0,"Nhu cầu xã hội chung tạo ra tiếng nói chung, sự thấu hiểu và sẻ chia, từ đó thắt chặt tình đoàn kết và gia tăng tính liên kết nội tại của nhóm.",P[9])
+  ]};
+}
+
+function parseQuiz(d){
+  var src,meta={};
+  if(Array.isArray(d)){src=d;}
+  else if(d&&Array.isArray(d.questions)){src=d.questions;meta=d;}
+  else return {error:'Không tìm thấy danh sách "questions".'};
+  if(!src.length) return {error:'Danh sách câu hỏi đang trống.'};
+  if(src.length>30) return {error:'Tối đa 30 câu hỏi.'};
+  var qs=[];
+  for(var i=0;i<src.length;i++){
+    var q=src[i];
+    if(!q||typeof q.text!=='string') return {error:'Câu '+(i+1)+': thiếu "text".'};
+    if(!Array.isArray(q.options)||q.options.length<2) return {error:'Câu '+(i+1)+': cần ít nhất 2 đáp án trong "options".'};
+    var o=q.options.slice(0,4).map(function(x){return String(x==null?'':x);});
+    while(o.length<4) o.push('');
+    var c=Number(q.correct);
+    if(!Number.isInteger(c)||c<0||c>3) return {error:'Câu '+(i+1)+': "correct" phải là số từ 0 đến 3 (0 là đáp án A).'};
+    var p=Number(q.prize);
+    if(!isFinite(p)||p<0) p=DEF_PRIZES[i]||(i+1)*1000000;
+    qs.push(mk(q.text,o,c,typeof q.note==='string'?q.note:'',Math.floor(p),q.safe===true));
+  }
+  var L=meta.life&&typeof meta.life==='object'?meta.life:{};
+  return {data:{
+    title:(typeof meta.title==='string'&&meta.title.trim())?meta.title.slice(0,120):'Triệu phú đố vui',
+    shuffle:meta.shuffle===true,
+    sample:meta.sample===true,
+    life:{fifty:L.fifty!==false,aud:L.aud!==false,phone:L.phone!==false},
+    questions:qs
+  }};
+}
+function exportObj(flag){
+  var o={title:S.title,shuffle:S.shuffle,life:{fifty:S.life.fifty,aud:S.life.aud,phone:S.life.phone}};
+  if(flag) o.sample=!!S.sample;
+  o.questions=S.questions.map(function(q){return {text:q.text,options:q.options.slice(),correct:q.correct,note:q.note,prize:q.prize,safe:q.safe};});
+  return o;
+}
+function load(){
+  try{
+    var raw=localStorage.getItem(KEY);
+    if(raw){var r=parseQuiz(JSON.parse(raw)); if(r.data&&!r.data.sample) return r.data;}
+  }catch(e){}
+  return sample();
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(exportObj(true)));}catch(e){}}
+
+var S=load();
+var mode='play';
+var g=blank();
+function blank(){return {phase:'start',items:[],idx:0,sel:-1,locked:false,ok:false,won:0,safe:0,right:0,removed:{},poll:null,hint:null,used:{},anim:null,kind:'',final:0};}
+
+function qProblem(q){
+  if(!q.text.trim()) return 'Chưa có nội dung câu hỏi';
+  var n=q.options.filter(function(o){return o.trim();}).length;
+  if(n<2) return 'Cần ít nhất 2 đáp án';
+  if(!q.options[q.correct].trim()) return 'Đáp án đúng đang để trống';
+  return '';
+}
+function problems(){
+  var out=[];
+  S.questions.forEach(function(q,i){var p=qProblem(q);if(p) out.push('Câu '+(i+1)+': '+p.charAt(0).toLowerCase()+p.slice(1));});
+  return out;
+}
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function prepare(){
+  return S.questions.map(function(q){
+    var opts=[];
+    q.options.forEach(function(t,i){if(t.trim()) opts.push({t:t.trim(),ok:i===q.correct});});
+    if(S.shuffle) shuffle(opts);
+    return {text:q.text.trim(),note:q.note.trim(),prize:q.prize,safe:q.safe,opts:opts};
+  });
+}
+var toastTid=0;
+function toast(m){var t=$('toast');t.textContent=m;t.hidden=false;clearTimeout(toastTid);toastTid=setTimeout(function(){t.hidden=true;},3200);}
+function cur(){return g.items[g.idx];}
+function aliveList(){var it=cur(),a=[];it.opts.forEach(function(o,i){if(!g.removed[i]) a.push(i);});return a;}
+function clamp(x,a,b){return Math.max(a,Math.min(b,x));}
+
+/* ---------- game flow ---------- */
+function startGame(){
+  if(problems().length) return;
+  g=blank();g.phase='ask';g.items=prepare();
+  renderPlay();window.scrollTo(0,0);
+}
+function pick(pos){
+  if(g.phase!=='ask'||g.locked||g.removed[pos]||pos>=cur().opts.length) return;
+  g.sel=pos;renderPlay();
+}
+function confirmAns(){
+  if(g.phase!=='ask'||g.locked||g.sel<0) return;
+  var it=cur();
+  g.locked=true;g.ok=it.opts[g.sel].ok;
+  if(g.ok){
+    g.anim={from:g.won,to:it.prize};
+    g.won=it.prize;g.right++;
+    if(it.safe) g.safe=it.prize;
+  }
+  renderPlay();
+}
+function next(){
+  if(g.phase!=='ask'||!g.locked) return;
+  if(!g.ok){endGame('lose');return;}
+  if(g.idx+1>=g.items.length){endGame('win');return;}
+  g.idx++;g.sel=-1;g.locked=false;g.ok=false;g.removed={};g.poll=null;g.hint=null;
+  renderPlay();window.scrollTo(0,0);
+}
+function endGame(kind){
+  var amt=kind==='lose'?g.safe:g.won;
+  g.phase='result';g.kind=kind;g.final=amt;g.anim={from:0,to:amt};
+  renderPlay();window.scrollTo(0,0);
+}
+function useLife(k){
+  if(g.phase!=='ask'||g.locked||g.used[k]||!S.life[k]) return;
+  var it=cur(),alive=aliveList(),ci=-1;
+  alive.forEach(function(i){if(it.opts[i].ok) ci=i;});
+  var wrong=alive.filter(function(i){return i!==ci;});
+  if(k==='fifty'){
+    if(wrong.length<2) return;
+    shuffle(wrong);g.removed[wrong[0]]=true;g.removed[wrong[1]]=true;
+    if(g.sel>=0&&g.removed[g.sel]) g.sel=-1;
+    g.poll=null;g.hint=null;
+  }else if(k==='aud'){
+    var pc=clamp(0.9-g.idx*0.05+(Math.random()*0.1-0.05),0.38,0.9);
+    var cp=Math.round(pc*100),poll={},total=cp;
+    var w=wrong.map(function(){return Math.random()+0.15;});
+    var ws=w.reduce(function(a,b){return a+b;},0);
+    wrong.forEach(function(i,n){var v=Math.round((100-cp)*w[n]/ws);poll[i]=v;total+=v;});
+    poll[ci]=cp+(100-total);
+    g.poll=poll;
+  }else if(k==='phone'){
+    var p=clamp(0.92-g.idx*0.05,0.4,0.92);
+    var pos=ci;
+    if(Math.random()>=p&&wrong.length) pos=wrong[Math.floor(Math.random()*wrong.length)];
+    var conf=clamp(Math.round((p*100-8+Math.random()*16)/5)*5,40,95);
+    g.hint={pos:pos,conf:conf};
+  }
+  g.used[k]=true;renderPlay();
+}
+
+/* ---------- play views ---------- */
+function ladderHTML(plain){
+  var h='<aside class="ladder'+(plain?' plain':'')+'" aria-label="Bảng thưởng"><p class="eyebrow">Bảng thưởng</p><ol>';
+  for(var i=S.questions.length-1;i>=0;i--){
+    var q=plain?S.questions[i]:g.items[i];
+    var c=q.safe?'safe':'';
+    if(!plain){
+      if(i===g.idx) c+=' cur';
+      else if(i<g.idx) c+=' done';
+    }
+    h+='<li class="'+c+'"><span>'+(i+1)+'</span><span class="pz">'+money(q.prize)+'</span><span class="flag">'+(q.safe?'Mốc':'')+'</span></li>';
+  }
+  return h+'</ol></aside>';
+}
+function startHTML(){
+  var n=S.questions.length,pr=problems(),top=S.questions.length?S.questions[n-1].prize:0;
+  var lifeNames=[];if(S.life.fifty) lifeNames.push('50:50');if(S.life.aud) lifeNames.push('Hỏi khán giả');if(S.life.phone) lifeNames.push('Gọi người thân');
+  var h='<section class="hero"><div>';
+  h+='<p class="eyebrow">Trò chơi đố vui · '+n+' câu hỏi</p>';
+  h+='<h1>'+esc(S.title)+'</h1>';
+  h+='<ul class="chips"><li>Giải cao nhất '+money(top)+'</li><li>'+(lifeNames.length?'Quyền trợ giúp: '+lifeNames.join(', '):'Không có quyền trợ giúp')+'</li></ul>';
+  if(S.sample) h+='<div class="box info">Đây là bộ câu hỏi mẫu. Mở <button type="button" class="link" data-act="toedit">Soạn câu hỏi</button> để thay bằng nội dung của bạn.</div>';
+  if(pr.length) h+='<div class="box warn"><strong>Cần sửa trước khi chơi</strong><ul>'+pr.map(function(p){return '<li>'+esc(p)+'</li>';}).join('')+'</ul></div>';
+  h+='<div class="row"><button type="button" class="btn primary big" data-act="start"'+(pr.length?' disabled':'')+'>Vào chơi</button><button type="button" class="btn" data-act="toedit">Soạn câu hỏi</button></div>';
+  h+='<p class="keys">Phím tắt: A–D hoặc 1–4 chọn đáp án<br>Enter chốt đáp án / câu tiếp</p>';
+  h+='</div>'+ladderHTML(true)+'</section>';
+  return h;
+}
+function questionHTML(){
+  var it=cur(),n=g.items.length,r;
+  var shown=g.anim?g.anim.from:g.won;
+  var h='<div class="game"><section>';
+  h+='<div class="stake"><div><p class="eyebrow" style="margin-bottom:6px">Tiền thưởng đang có</p><p class="amount" id="amt">'+money(shown)+'</p></div>';
+  h+='<div class="lifelines">';
+  var defs=[['fifty','50:50'],['aud','Hỏi khán giả'],['phone','Gọi người thân']];
+  defs.forEach(function(d){
+    if(!S.life[d[0]]) return;
+    var used=!!g.used[d[0]],dis=used||g.locked;
+    if(d[0]==='fifty'&&!used){var al=aliveList().filter(function(i){return !it.opts[i].ok;});if(al.length<2) dis=true;}
+    h+='<button type="button" class="life'+(used?' used':'')+'" data-act="life" data-k="'+d[0]+'"'+(dis?' disabled':'')+'>'+d[1]+'</button>';
+  });
+  h+='</div></div>';
+  h+='<p class="qmeta">Câu <b>'+(g.idx+1)+' / '+n+'</b> · trị giá <b>'+money(it.prize)+'</b>'+(it.safe?' · mốc an toàn':'')+'</p>';
+  h+='<h2 class="question">'+esc(it.text)+'</h2>';
+  if(g.hint) h+='<p class="hint"><b>Người thân:</b> “Mình nghĩ là đáp án <b>'+LET[g.hint.pos]+'</b>, khoảng '+g.hint.conf+'% chắc chắn.”</p>';
+  h+='<div class="opts">';
+  it.opts.forEach(function(o,k){
+    var cls='opt',tag='',dis=false;
+    if(g.removed[k]){cls+=' gone';dis=true;}
+    else if(g.locked){
+      dis=true;
+      if(o.ok){cls+=' right';tag=g.sel===k?'Bạn chọn đúng':'Đáp án đúng';}
+      else if(g.sel===k){cls+=' wrong';tag='Bạn chọn';}
+    }else if(g.sel===k) cls+=' sel';
+    h+='<button type="button" class="'+cls+'" data-act="pick" data-pos="'+k+'"'+(dis?' aria-disabled="true"':'')+(g.sel===k&&!g.locked?' aria-pressed="true"':'')+'><span class="let">'+LET[k]+'</span><span class="otext">'+esc(o.t)+'</span>';
+    if(g.poll&&g.poll[k]!=null&&!g.removed[k]) h+='<span class="pct">'+g.poll[k]+'%</span><i class="bar" style="width:'+g.poll[k]+'%"></i>';
+    if(tag) h+='<span class="tag">'+tag+'</span>';
+    h+='</button>';
+  });
+  h+='</div>';
+  if(g.locked){
+    if(g.ok) h+='<p class="verdict good">Chính xác! Bạn có '+money(g.won)+'.</p>';
+    else{
+      var ans=it.opts.filter(function(o){return o.ok;})[0],ai=it.opts.indexOf(ans);
+      h+='<p class="verdict bad">Rất tiếc, đáp án đúng là '+LET[ai]+'. Bạn ra về với '+money(g.safe)+'.</p>';
+    }
+    if(it.note) h+='<p class="explain">'+esc(it.note)+'</p>';
+  }
+  h+='<div class="actions">';
+  if(g.locked){
+    var lab=!g.ok?'Xem kết quả':(g.idx+1>=n?'Nhận giải thưởng':'Câu tiếp');
+    h+='<span></span><button type="button" class="btn primary big" data-act="next">'+lab+' →</button>';
+  }else{
+    h+='<button type="button" class="btn" data-act="walk">Dừng cuộc chơi · nhận '+money(g.won)+'</button>';
+    h+='<button type="button" class="btn primary big" data-act="confirm"'+(g.sel<0?' disabled':'')+'>Chốt đáp án</button>';
+  }
+  h+='</div></section>'+ladderHTML(false)+'</div>';
+  return h;
+}
+function resultHTML(){
+  var n=g.items.length;
+  var head={win:'Bạn đã chinh phục toàn bộ bảng thưởng!',lose:g.safe>0?'Rất tiếc, bạn giữ lại mốc an toàn.':'Rất tiếc, bạn chưa đi tiếp được.',walk:'Bạn dừng cuộc chơi đúng lúc.'}[g.kind];
+  var h='<section class="result"><p class="eyebrow">Kết thúc</p><h2>'+head+'</h2>';
+  h+='<p class="bigamt" id="amt">'+money(0)+'</p>';
+  h+='<p class="sub">Trả lời đúng '+g.right+' / '+n+' câu.</p>';
+  h+='<div class="row"><button type="button" class="btn primary big" data-act="start">Chơi lại</button><button type="button" class="btn" data-act="toedit">Sửa câu hỏi</button></div></section>';
+  return h;
+}
+function countUp(el,from,to){
+  if(!el) return;
+  if(REDUCED||from===to){el.textContent=money(to);return;}
+  var t0=performance.now(),ms=900;
+  function f(t){
+    var p=Math.min(1,(t-t0)/ms);
+    el.textContent=money(from+(to-from)*(1-Math.pow(1-p,3)));
+    if(p<1) requestAnimationFrame(f);
+  }
+  requestAnimationFrame(f);
+}
+function renderPlay(){
+  var el=$('play');
+  el.innerHTML=g.phase==='start'?startHTML():g.phase==='ask'?questionHTML():resultHTML();
+  if(g.anim){var a=g.anim;g.anim=null;countUp($('amt'),a.from,a.to);}
+}
+
+/* ---------- edit view ---------- */
+function cardHTML(q,i){
+  var pb=qProblem(q),n=S.questions.length;
+  var h='<article class="panel" data-qid="'+q.id+'">';
+  h+='<div class="qh"><h3>Câu '+(i+1)+'</h3><span class="qstatus '+(pb?'warn':'ok')+'" data-st="'+q.id+'">'+esc(pb||'Sẵn sàng')+'</span><div class="tools">';
+  h+='<button type="button" class="btn small" data-act="up" data-qid="'+q.id+'"'+(i===0?' disabled':'')+'>Lên</button>';
+  h+='<button type="button" class="btn small" data-act="down" data-qid="'+q.id+'"'+(i===n-1?' disabled':'')+'>Xuống</button>';
+  h+='<button type="button" class="btn small" data-act="dup" data-qid="'+q.id+'">Nhân đôi</button>';
+  h+='<button type="button" class="btn small" data-act="del" data-qid="'+q.id+'"'+(n<=1?' disabled':'')+'>Xóa</button></div></div>';
+  h+='<div><label class="lbl" for="'+q.id+'-text">Câu hỏi</label><textarea class="in" id="'+q.id+'-text" data-qid="'+q.id+'" data-f="text" rows="2">'+esc(q.text)+'</textarea></div>';
+  h+='<div><p class="lbl">Đáp án <span>· chọn nút tròn ở đáp án đúng. Để trống C hoặc D nếu chỉ cần 2 đáp án.</span></p><div class="opts-edit">';
+  for(var k=0;k<4;k++){
+    h+='<div class="orow"><input type="radio" name="'+q.id+'-c" id="'+q.id+'-r'+k+'" data-qid="'+q.id+'" data-f="correct" value="'+k+'"'+(q.correct===k?' checked':'')+' aria-label="Đáp án '+LET[k]+' là đáp án đúng">';
+    h+='<label class="letter" for="'+q.id+'-r'+k+'">'+LET[k]+'</label>';
+    h+='<input type="text" class="in" id="'+q.id+'-o'+k+'" data-qid="'+q.id+'" data-f="o'+k+'" value="'+esc(q.options[k])+'" placeholder="Đáp án '+LET[k]+(k>1?' (không bắt buộc)':'')+'" aria-label="Nội dung đáp án '+LET[k]+'"></div>';
+  }
+  h+='</div></div>';
+  h+='<div class="prizerow"><div><label class="lbl" for="'+q.id+'-prize">Mức thưởng (đồng) <span data-pz="'+q.id+'">· '+money(q.prize)+'</span></label><input type="number" class="in" id="'+q.id+'-prize" data-qid="'+q.id+'" data-f="prize" min="0" step="1000" value="'+q.prize+'"></div>';
+  h+='<label class="check" for="'+q.id+'-safe" style="padding-bottom:10px"><input type="checkbox" id="'+q.id+'-safe" data-qid="'+q.id+'" data-f="safe"'+(q.safe?' checked':'')+'>Mốc an toàn</label></div>';
+  h+='<div><label class="lbl" for="'+q.id+'-note">Giải thích sau khi hiện đáp án <span>(không bắt buộc)</span></label><input type="text" class="in" id="'+q.id+'-note" data-qid="'+q.id+'" data-f="note" value="'+esc(q.note)+'"></div>';
+  return h+'</article>';
+}
+function renderEdit(focusId){
+  var h='<p class="eyebrow">Soạn câu hỏi</p><h2>Chỉnh bộ câu hỏi và bảng thưởng</h2>';
+  h+='<p class="lead">Thứ tự các câu chính là thứ tự chơi. Mọi thay đổi được lưu tự động trên trình duyệt này.</p>';
+  h+='<div class="row" style="margin-bottom:18px"><button type="button" class="btn primary" data-act="tryplay">Chơi thử →</button></div>';
+  h+='<section class="panel"><h3>Thiết lập chung</h3><div class="settings">';
+  h+='<div><label class="lbl" for="s-title">Tiêu đề</label><input type="text" class="in" id="s-title" value="'+esc(S.title)+'" maxlength="120"></div>';
+  h+='<div class="checks"><label class="check" for="s-shuffle"><input type="checkbox" id="s-shuffle"'+(S.shuffle?' checked':'')+'>Xáo trộn thứ tự đáp án</label>';
+  h+='<label class="check" for="l-fifty"><input type="checkbox" id="l-fifty"'+(S.life.fifty?' checked':'')+'>Quyền 50:50</label>';
+  h+='<label class="check" for="l-aud"><input type="checkbox" id="l-aud"'+(S.life.aud?' checked':'')+'>Hỏi khán giả</label>';
+  h+='<label class="check" for="l-phone"><input type="checkbox" id="l-phone"'+(S.life.phone?' checked':'')+'>Gọi người thân</label></div>';
+  h+='</div></section>';
+  h+='<div class="list">'+S.questions.map(cardHTML).join('')+'</div>';
+  h+='<button type="button" class="btn add" data-act="add">+ Thêm câu hỏi</button>';
+  h+='<section class="panel" style="margin-top:18px"><h3>Sao lưu và chia sẻ</h3>';
+  h+='<p class="msg" style="min-height:0">Sao chép JSON để lưu lại hoặc gửi cho người khác. Dán JSON vào ô bên dưới rồi nhấn Nhập để thay toàn bộ bộ câu hỏi hiện tại.</p>';
+  h+='<textarea class="in jsonbox" id="jsonBox" aria-label="JSON bộ câu hỏi" spellcheck="false"></textarea>';
+  h+='<div class="row"><button type="button" class="btn" data-act="export">Sao chép JSON</button><button type="button" class="btn" data-act="import">Nhập từ JSON</button><button type="button" class="btn" data-act="reset">Khôi phục bộ câu hỏi gốc</button></div>';
+  h+='<p class="msg" id="jsonMsg" role="status"></p></section>';
+  $('edit').innerHTML=h;
+  if(focusId){var f=$(focusId);if(f){f.focus();f.scrollIntoView({block:'center'});}}
+}
+function qById(id){for(var i=0;i<S.questions.length;i++) if(S.questions[i].id===id) return i;return -1;}
+function edited(){S.sample=false;save();}
+function arm(btn,label,fn){
+  if(btn.dataset.armed){clearTimeout(+btn.dataset.armed);fn();return;}
+  var old=btn.textContent;btn.textContent=label;btn.classList.add('armed');
+  btn.dataset.armed=String(setTimeout(function(){delete btn.dataset.armed;btn.textContent=old;btn.classList.remove('armed');},3000));
+}
+function refreshStatus(q){
+  var s=document.querySelector('[data-st="'+q.id+'"]');if(!s) return;
+  var p=qProblem(q);s.textContent=p||'Sẵn sàng';s.className='qstatus '+(p?'warn':'ok');
+}
+
+/* ---------- events ---------- */
+$('play').addEventListener('click',function(e){
+  var b=e.target.closest('[data-act]');if(!b||b.disabled) return;
+  var a=b.dataset.act;
+  if(a==='start') startGame();
+  else if(a==='toedit') setMode('edit');
+  else if(a==='pick') pick(Number(b.dataset.pos));
+  else if(a==='confirm') confirmAns();
+  else if(a==='next') next();
+  else if(a==='life') useLife(b.dataset.k);
+  else if(a==='walk') arm(b,'Chắc chắn dừng?',function(){endGame('walk');});
+});
+document.addEventListener('keydown',function(e){
+  if(mode!=='play'||e.metaKey||e.ctrlKey||e.altKey) return;
+  var t=e.target;
+  if(t&&/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
+  var k=e.key,onBtn=t&&t.tagName==='BUTTON';
+  if(g.phase==='ask'){
+    if(k.length===1){
+      var m=/^[1-4]$/.test(k)?Number(k)-1:'abcd'.indexOf(k.toLowerCase());
+      if(m>=0&&!g.locked){e.preventDefault();pick(m);return;}
+    }
+    if(k==='Enter'&&!onBtn){e.preventDefault();if(g.locked) next();else confirmAns();}
+  }else if(k==='Enter'&&!onBtn){
+    e.preventDefault();startGame();
+  }
+});
+$('edit').addEventListener('input',function(e){
+  var el=e.target,id=el.id;
+  if(id==='s-title'){S.title=el.value;$('brandTitle').textContent=S.title||'Triệu phú đố vui';edited();return;}
+  var f=el.dataset.f;if(!f||f==='correct'||f==='safe') return;
+  var i=qById(el.dataset.qid);if(i<0) return;
+  var q=S.questions[i];
+  if(f==='text') q.text=el.value;
+  else if(f==='note') q.note=el.value;
+  else if(f==='prize'){
+    q.prize=Math.max(0,Math.floor(Number(el.value)||0));
+    var pz=document.querySelector('[data-pz="'+q.id+'"]');if(pz) pz.textContent='· '+money(q.prize);
+  }else q.options[Number(f.charAt(1))]=el.value;
+  edited();refreshStatus(q);
+});
+$('edit').addEventListener('change',function(e){
+  var el=e.target,id=el.id;
+  if(id==='s-shuffle'){S.shuffle=el.checked;save();return;}
+  if(id==='l-fifty'||id==='l-aud'||id==='l-phone'){S.life[id.slice(2)]=el.checked;save();return;}
+  var i=el.dataset.qid?qById(el.dataset.qid):-1;if(i<0) return;
+  if(el.dataset.f==='correct'){S.questions[i].correct=Number(el.value);edited();refreshStatus(S.questions[i]);}
+  else if(el.dataset.f==='safe'){S.questions[i].safe=el.checked;edited();}
+});
+$('edit').addEventListener('click',function(e){
+  var b=e.target.closest('[data-act]');if(!b||b.disabled) return;
+  var a=b.dataset.act,i=b.dataset.qid?qById(b.dataset.qid):-1;
+  if(a==='tryplay'){setMode('play');startGame();}
+  else if(a==='add'){
+    var last=S.questions[S.questions.length-1];
+    var q=mk('',['','','',''],0,'',last?last.prize*2:200000,false);
+    S.questions.push(q);edited();renderEdit(q.id+'-text');
+  }
+  else if(a==='up'&&i>0){var t=S.questions[i];S.questions[i]=S.questions[i-1];S.questions[i-1]=t;edited();renderEdit();}
+  else if(a==='down'&&i>=0&&i<S.questions.length-1){var t2=S.questions[i];S.questions[i]=S.questions[i+1];S.questions[i+1]=t2;edited();renderEdit();}
+  else if(a==='dup'&&i>=0){var s=S.questions[i],c=mk(s.text,s.options.slice(),s.correct,s.note,s.prize,s.safe);S.questions.splice(i+1,0,c);edited();renderEdit(c.id+'-text');}
+  else if(a==='del'&&i>=0){arm(b,'Xóa thật?',function(){S.questions.splice(i,1);edited();renderEdit();});}
+  else if(a==='export'){doExport();}
+  else if(a==='import'){doImport();}
+  else if(a==='reset'){arm(b,'Chắc chắn?',function(){S=sample();save();renderEdit();$('brandTitle').textContent=S.title;setMsg('Đã khôi phục bộ câu hỏi gốc.');});}
+});
+function setMsg(m){var el=$('jsonMsg');if(el) el.textContent=m;}
+function doExport(){
+  var box=$('jsonBox'),text=JSON.stringify(exportObj(false),null,2);
+  box.value=text;
+  var done=function(){setMsg('Đã sao chép JSON của '+S.questions.length+' câu hỏi.');};
+  var fail=function(){box.focus();box.select();setMsg('Không sao chép tự động được. JSON đã được chọn sẵn, nhấn Ctrl+C (hoặc Cmd+C) để sao chép.');};
+  try{
+    if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done,fail);
+    else fail();
+  }catch(err){fail();}
+}
+function doImport(){
+  var raw=$('jsonBox').value.trim();
+  if(!raw){setMsg('Ô JSON đang trống. Dán nội dung đã sao chép vào đây trước.');return;}
+  var d;
+  try{d=JSON.parse(raw);}catch(err){setMsg('Không đọc được JSON. Kiểm tra lại dấu ngoặc và dấu phẩy.');return;}
+  var r=parseQuiz(d);
+  if(r.error){setMsg(r.error);return;}
+  S=r.data;S.sample=false;save();renderEdit();
+  $('brandTitle').textContent=S.title;
+  setMsg('Đã nhập '+S.questions.length+' câu hỏi.');
+}
+
+/* ---------- theme tab ---------- */
+var TKEY='trieu-phu-theme-v1';
+var DEF_C={bg:'#071F26',panel:'#0D2E37',tile:'#11404B',pick:'#FF9B42',ink:'#F2EADB'};
+var PRESETS=[
+  ['Xanh ngọc',DEF_C],
+  ['Xanh navy',{bg:'#0A1030',panel:'#121A48',tile:'#1B2766',pick:'#FFC93C',ink:'#F1F3FF'}],
+  ['Đỏ nhung',{bg:'#1E0A14',panel:'#2E1220',tile:'#421A2E',pick:'#FF8A5B',ink:'#FBEFE6'}],
+  ['Tím đêm',{bg:'#140D2B',panel:'#1F1640',tile:'#2D2060',pick:'#5EE6C8',ink:'#F0ECFF'}],
+  ['Nền sáng',{bg:'#EEF2F7',panel:'#FFFFFF',tile:'#E1E8F2',pick:'#E4571B',ink:'#14213D'}]
+];
+var CLABELS=[['bg','Nền'],['panel','Khung'],['tile','Ô đáp án'],['pick','Màu nhấn'],['ink','Chữ']];
+var SYS="system-ui,-apple-system,'Segoe UI',sans-serif";
+var FONTS={
+  'default':{n:'Mặc định'},
+  be:{n:'Be Vietnam Pro',d:"'Be Vietnam Pro',"+SYS,b:"'Be Vietnam Pro',"+SYS},
+  mont:{n:'Montserrat',d:"'Montserrat','Be Vietnam Pro',"+SYS,b:"'Montserrat','Be Vietnam Pro',"+SYS},
+  lora:{n:'Lora (có chân)',d:"'Lora',Georgia,serif",b:"'Be Vietnam Pro',"+SYS},
+  sys:{n:'Font hệ thống',d:SYS,b:SYS}
+};
+var TPROPS=['--bg','--panel','--tile','--tile-hi','--line','--ink','--muted','--pick','--pick-fg','--good','--good-bg','--bad','--bad-bg','--warn','--warn-bg','--f-display','--f-body','--scale'];
+function hex2rgb(h){var n=parseInt(h.slice(1),16);return [(n>>16)&255,(n>>8)&255,n&255];}
+function rgb2hex(a){return '#'+a.map(function(v){return ('0'+Math.round(clamp(v,0,255)).toString(16)).slice(-2);}).join('');}
+function mix(a,b,t){var x=hex2rgb(a),y=hex2rgb(b);return rgb2hex(x.map(function(v,i){return v+(y[i]-v)*t;}));}
+function lum(h){
+  var c=hex2rgb(h).map(function(v){v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);});
+  return 0.2126*c[0]+0.7152*c[1]+0.0722*c[2];
+}
+function loadTheme(){
+  var t={c:null,font:'default',scale:1,css:''};
+  try{
+    var r=JSON.parse(localStorage.getItem(TKEY)||'null');
+    if(r){
+      if(r.c&&CLABELS.every(function(l){return /^#[0-9a-f]{6}$/i.test(String(r.c[l[0]]));})) t.c=r.c;
+      if(FONTS[r.font]) t.font=r.font;
+      var s=Number(r.scale);if(s>=0.8&&s<=1.6) t.scale=s;
+      if(typeof r.css==='string') t.css=r.css.slice(0,20000);
+    }
+  }catch(e){}
+  return t;
+}
+var T=loadTheme();
+function saveTheme(){try{localStorage.setItem(TKEY,JSON.stringify(T));}catch(e){}}
+var userCss=document.createElement('style');
+userCss.id='userCss';
+document.head.appendChild(userCss);
+function applyTheme(){
+  var st=document.documentElement.style;
+  TPROPS.forEach(function(p){st.removeProperty(p);});
+  st.colorScheme='';
+  var c=T.c;
+  if(c){
+    var light=lum(c.bg)>0.45;
+    st.setProperty('--bg',c.bg);st.setProperty('--panel',c.panel);st.setProperty('--tile',c.tile);
+    st.setProperty('--ink',c.ink);st.setProperty('--pick',c.pick);
+    st.setProperty('--pick-fg',lum(c.pick)>0.3?'#1A1000':'#FFFFFF');
+    st.setProperty('--line',mix(c.panel,c.ink,0.22));
+    st.setProperty('--tile-hi',mix(c.tile,c.ink,0.1));
+    st.setProperty('--muted',mix(c.bg,c.ink,0.62));
+    if(light){
+      st.setProperty('--good','#0F7A57');st.setProperty('--good-bg','#D6F3E6');
+      st.setProperty('--bad','#C62F4C');st.setProperty('--bad-bg','#FBDDE3');
+      st.setProperty('--warn','#7A5200');st.setProperty('--warn-bg','#FFF0C2');
+      st.colorScheme='light';
+    }
+  }
+  var f=FONTS[T.font];
+  if(f&&f.d){st.setProperty('--f-display',f.d);st.setProperty('--f-body',f.b);}
+  if(T.scale!==1) st.setProperty('--scale',String(T.scale));
+  userCss.textContent=T.css;
+}
+function curColors(){return T.c||DEF_C;}
+function renderTheme(){
+  var c=curColors();
+  var h='<p class="eyebrow">Giao diện</p><h2>Chỉnh màu sắc và chữ</h2>';
+  h+='<p class="lead">Thay đổi áp dụng ngay và được lưu trong trình duyệt này. Muốn dùng lại bản mặc định thì bấm "Khôi phục giao diện".</p>';
+  h+='<div class="pv" style="margin-bottom:18px"><p class="qmeta" style="margin-top:0">Câu <b>3 / 10</b> · trị giá <b>600.000 đ</b></p>';
+  h+='<h2 class="question" style="margin:10px 0 18px">Đây là câu hỏi xem thử?</h2><div class="opts">';
+  h+='<div class="opt" aria-disabled="true"><span class="let">A</span><span class="otext">Đáp án bình thường</span></div>';
+  h+='<div class="opt sel" aria-disabled="true"><span class="let">B</span><span class="otext">Đáp án đang chọn</span></div>';
+  h+='<div class="opt right" aria-disabled="true"><span class="let">C</span><span class="otext">Đáp án đúng</span><span class="tag">Đáp án đúng</span></div>';
+  h+='<div class="opt wrong" aria-disabled="true"><span class="let">D</span><span class="otext">Đáp án chọn sai</span><span class="tag">Bạn chọn</span></div>';
+  h+='</div></div>';
+  h+='<section class="panel"><h3>Bảng màu</h3><div class="presets">';
+  PRESETS.forEach(function(p,i){
+    h+='<button type="button" class="btn small" data-act="preset" data-i="'+i+'"><span class="sw" style="background:'+p[1].bg+'"></span><span class="sw" style="background:'+p[1].pick+'"></span>'+esc(p[0])+'</button>';
+  });
+  h+='</div><div class="colorgrid">';
+  CLABELS.forEach(function(l){
+    h+='<div class="cg"><input type="color" id="c-'+l[0]+'" data-ck="'+l[0]+'" value="'+c[l[0]]+'" aria-label="Màu '+l[1]+'"><div><label class="lbl" for="c-'+l[0]+'">'+l[1]+'</label><code data-hex="'+l[0]+'">'+c[l[0]].toUpperCase()+'</code></div></div>';
+  });
+  h+='</div></section>';
+  h+='<section class="panel" style="margin-top:14px"><h3>Chữ</h3><div><label class="lbl" for="t-font">Font</label><select class="in" id="t-font">';
+  Object.keys(FONTS).forEach(function(k){h+='<option value="'+k+'"'+(T.font===k?' selected':'')+'>'+esc(FONTS[k].n)+'</option>';});
+  h+='</select></div><div><label class="lbl" for="t-scale">Cỡ chữ câu hỏi và đáp án <span id="t-scale-v">· '+Math.round(T.scale*100)+'%</span></label>';
+  h+='<input type="range" id="t-scale" min="0.8" max="1.6" step="0.05" value="'+T.scale+'"></div></section>';
+  h+='<section class="panel" style="margin-top:14px"><h3>CSS tùy chỉnh</h3>';
+  h+='<p class="msg" style="min-height:0">Dành cho ai biết CSS. Áp dụng ngay khi gõ. Có thể dùng các biến màu như var(--pick), var(--panel), var(--ink).</p>';
+  h+='<textarea class="in cssbox" id="t-css" aria-label="CSS tùy chỉnh" spellcheck="false" placeholder=".question { letter-spacing: 0; }">'+esc(T.css)+'</textarea></section>';
+  h+='<div class="row" style="margin-top:18px"><button type="button" class="btn primary" data-act="toplay">Về trình chiếu →</button><button type="button" class="btn" data-act="treset">Khôi phục giao diện</button></div>';
+  $('theme').innerHTML=h;
+}
+$('theme').addEventListener('input',function(e){
+  var el=e.target;
+  if(el.dataset.ck){
+    if(!T.c) T.c=Object.assign({},DEF_C);
+    T.c[el.dataset.ck]=el.value;
+    var hx=document.querySelector('[data-hex="'+el.dataset.ck+'"]');if(hx) hx.textContent=el.value.toUpperCase();
+  }else if(el.id==='t-scale'){
+    T.scale=clamp(Number(el.value)||1,0.8,1.6);
+    $('t-scale-v').textContent='· '+Math.round(T.scale*100)+'%';
+  }else if(el.id==='t-css'){
+    T.css=el.value.slice(0,20000);
+  }else return;
+  applyTheme();saveTheme();
+});
+$('theme').addEventListener('change',function(e){
+  if(e.target.id==='t-font'){T.font=e.target.value;applyTheme();saveTheme();}
+});
+$('theme').addEventListener('click',function(e){
+  var b=e.target.closest('[data-act]');if(!b) return;
+  var a=b.dataset.act;
+  if(a==='preset'){T.c=Object.assign({},PRESETS[Number(b.dataset.i)][1]);applyTheme();saveTheme();renderTheme();}
+  else if(a==='toplay') setMode('play');
+  else if(a==='treset') arm(b,'Chắc chắn?',function(){T={c:null,font:'default',scale:1,css:''};applyTheme();saveTheme();renderTheme();});
+});
+
+/* ---------- mode + chrome ---------- */
+function setMode(m){
+  mode=m;
+  if(m==='edit'){g=blank();}
+  $('play').hidden=m!=='play';$('edit').hidden=m!=='edit';$('theme').hidden=m!=='theme';
+  ['play','edit','theme'].forEach(function(k){$('tab-'+k).setAttribute('aria-selected',String(m===k));});
+  if(m==='edit') renderEdit(); else if(m==='theme') renderTheme(); else renderPlay();
+  window.scrollTo(0,0);
+}
+document.querySelector('.tabs').addEventListener('click',function(e){
+  var b=e.target.closest('[data-mode]');if(b&&b.dataset.mode!==mode) setMode(b.dataset.mode);
+});
+$('fsBtn').addEventListener('click',function(){
+  var msg='Trình duyệt không cho phép toàn màn hình ở đây.';
+  try{
+    if(document.fullscreenElement){document.exitFullscreen();return;}
+    var de=document.documentElement,p=de.requestFullscreen&&de.requestFullscreen();
+    if(p&&p.catch) p.catch(function(){toast(msg);}); else toast(msg);
+  }catch(err){toast(msg);}
+});
+document.addEventListener('fullscreenchange',function(){$('fsBtn').textContent=document.fullscreenElement?'Thoát toàn màn hình':'Toàn màn hình';});
+
+$('brandTitle').textContent=S.title||'Triệu phú đố vui';
+applyTheme();
+renderPlay();
+})();
+</script>
+
+</body></html>
